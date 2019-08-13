@@ -6,10 +6,9 @@ import android.content.DialogInterface
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
-//import android.os.CancellationSignal
 import com.thepascal.touchidtest.BiometricUtils
 
-class BiometricManager(var biometricBuilder: BiometricBuilder): BiometricManagerV23() { //https://github.com/anitaa1990/Biometric-Auth-Sample/blob/13b8679d0561ce13e1ba3b063dae091e11602df8/biometric-auth/src/main/java/com/an/biometric/BiometricManager.java
+class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23() {
 
     init {
         this.context = biometricBuilder.context
@@ -19,7 +18,7 @@ class BiometricManager(var biometricBuilder: BiometricBuilder): BiometricManager
         this.negativeButtonText = biometricBuilder.negativeButtonText
     }
 
-    val mCancellationSignal = CancellationSignal()
+    private val mCancellationSignal = CancellationSignal()
 
     fun authenticate(biometricCallback: BiometricCallback){
         if(title == "" || subtitle == "" || description == "" ||
