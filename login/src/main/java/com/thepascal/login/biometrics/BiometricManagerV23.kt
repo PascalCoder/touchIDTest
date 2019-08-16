@@ -1,4 +1,4 @@
-package com.thepascal.touchidtest.biometric
+package com.thepascal.touchidtest
 
 import android.annotation.TargetApi
 import android.content.Context
@@ -11,6 +11,8 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import android.security.keystore.KeyPermanentlyInvalidatedException
+import com.thepascal.login.R
+import com.thepascal.login.biometrics.BiometricCallback
 import java.io.IOException
 import java.security.*
 import javax.crypto.SecretKey
@@ -44,7 +46,7 @@ open class BiometricManagerV23 {
         if(initCipher()){
 
             cryptoObject = FingerprintManagerCompat.CryptoObject(cipher)
-            var fingerprintManagerCompat = FingerprintManagerCompat.from(context)
+            val fingerprintManagerCompat = FingerprintManagerCompat.from(context)
 
             fingerprintManagerCompat.authenticate(cryptoObject, 0, mCancellationSignalV23,
                 object: FingerprintManagerCompat.AuthenticationCallback() {
@@ -68,7 +70,7 @@ open class BiometricManagerV23 {
 
                     override fun onAuthenticationFailed() {
                         super.onAuthenticationFailed()
-                        updateStatus(context.getString(com.thepascal.touchidtest.R.string.biometric_failed))
+                        updateStatus(context.getString(R.string.biometric_failed))
                         biometricCallback.onAuthenticationFailed()
                     }
                 }, null)
@@ -100,8 +102,9 @@ open class BiometricManagerV23 {
 
         keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         keyGenerator.init(
-            KeyGenParameterSpec.Builder(KEY_NAME,
-                KeyProperties.PURPOSE_ENCRYPT ) //| KeyProperties.PURPOSE_DECRIPT
+            KeyGenParameterSpec.Builder(
+                KEY_NAME,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT) //| KeyProperties.PURPOSE_DECRIPT
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setUserAuthenticationRequired(true)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)

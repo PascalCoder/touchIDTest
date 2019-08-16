@@ -1,4 +1,4 @@
-package com.thepascal.touchidtest
+package com.thepascal.login.biometrics
 
 import android.Manifest
 import android.content.Context

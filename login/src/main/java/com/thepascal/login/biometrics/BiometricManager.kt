@@ -1,12 +1,16 @@
-package com.thepascal.touchidtest.biometric
+package com.thepascal.login.biometrics
 
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
-import com.thepascal.touchidtest.BiometricUtils
+import android.os.Handler
+import android.provider.Settings
+import android.widget.Toast
+import com.thepascal.touchidtest.BiometricManagerV23
 
 class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23() {
 
@@ -40,6 +44,28 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
 
         if(!BiometricUtils.isFingerprintAvailable(context)){
             biometricCallback.onBiometricAuthenticationNotAvailable()
+
+            //prompt the user to register a fingerprint for versions >= 28
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                Toast.makeText(context, "Please enroll a fingerprint", Toast.LENGTH_LONG).show()
+
+                Handler().postDelayed(
+                    {
+                        //Implicit intent sending user to register a fingerprint for versions >= 28
+                        context.startActivity(Intent(Settings.ACTION_FINGERPRINT_ENROLL))
+                    }, 5000
+                )
+            }else{
+                Toast.makeText(context, "Please enroll a fingerprint ", Toast.LENGTH_LONG).show()
+                Handler().postDelayed(
+                    {
+                        //Implicit intent sending user to register a fingerprint for versions < 28 and >= 23
+                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                    }, 5000
+                )
+
+            }
+
         }
 
         displayBiometricDialog(biometricCallback)
@@ -73,7 +99,8 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
             .build()
             .authenticate(
                 CancellationSignal(), context.mainExecutor,
-                            BiometricCallbackV28(biometricCallback))
+                BiometricCallbackV28(biometricCallback)
+            )
     }
 
     //var mCancellationSignal = CancellationSignal()
@@ -91,27 +118,27 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
             this.context = context
         }
 
-        fun setTitle(title: String): BiometricBuilder{
+        fun setTitle(title: String): BiometricBuilder {
             this.title = title
             return this
         }
 
-        fun setSubtitle(subtitle: String): BiometricBuilder{
+        fun setSubtitle(subtitle: String): BiometricBuilder {
             this.subtitle = subtitle
             return this
         }
 
-        fun setDescription(description: String): BiometricBuilder{
+        fun setDescription(description: String): BiometricBuilder {
             this.description = description
             return this
         }
 
-        fun setNegativeButtonText(negativeButtonText: String): BiometricBuilder{
+        fun setNegativeButtonText(negativeButtonText: String): BiometricBuilder {
             this.negativeButtonText = negativeButtonText
             return this
         }
 
-        fun build(): BiometricManager{
+        fun build(): BiometricManager {
             return BiometricManager(this)
         }
 

@@ -1,10 +1,11 @@
-package com.thepascal.touchidtest.biometric
+package com.thepascal.touchidtest
 
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.thepascal.touchidtest.R
+import com.thepascal.login.R
+import com.thepascal.login.biometrics.BiometricCallback
 import kotlinx.android.synthetic.main.view_bottom_sheet.*
 
 class BiometricDialogV23(context: Context): BottomSheetDialog(context), View.OnClickListener {

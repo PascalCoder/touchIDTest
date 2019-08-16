@@ -3,8 +3,8 @@ package com.thepascal.touchidtest
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.thepascal.touchidtest.biometric.BiometricCallback
-import com.thepascal.touchidtest.biometric.BiometricManager
+import com.thepascal.login.biometrics.BiometricCallback
+import com.thepascal.login.biometrics.BiometricManager
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), BiometricCallback {
@@ -24,6 +24,10 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
                 .setNegativeButtonText(getString(R.string.touchID_negative_btn_text))
                 .build()
 
+            if(mBiometricManager == null){
+
+            }
+
             mBiometricManager.authenticate(this@MainActivity)
         }
     }
@@ -33,11 +37,11 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
     }
 
     override fun onBiometricAuthenticationNotSupported() {
-        Toast.makeText(applicationContext, getString(R.string.biometric_error_hardware_not_supported), Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, getString(R.string.biometric_error_hardware_not_supported), Toast.LENGTH_SHORT   ).show()
     }
 
     override fun onBiometricAuthenticationNotAvailable() {
-        Toast.makeText(applicationContext, getString(R.string.biometric_error_fingerprint_not_available), Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, getString(R.string.biometric_error_fingerprint_not_available), Toast.LENGTH_SHORT).show()
     }
 
     override fun onBiometricAuthenticationPermissionNotGranted() {

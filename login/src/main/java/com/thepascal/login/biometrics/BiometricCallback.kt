@@ -1,4 +1,4 @@
-package com.thepascal.touchidtest.biometric
+package com.thepascal.login.biometrics
 
 interface BiometricCallback {
 

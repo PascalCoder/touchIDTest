@@ -6,6 +6,7 @@
     android:background="@drawable/bg_bottom_sheet"
     android:orientation="vertical"
     android:padding="15dp">
+    <!--  -->
 
     <ImageView
         android:id="@+id/imgLogo"
@@ -27,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/dialog_title"
-            android:textSize="18dp"/>
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/itemSubtitle"
@@ -35,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_xxsmall"
             android:textColor="@color/dialog_subtitle"
-            android:textSize="13dp"/>
+            android:textSize="13sp"/>
     </LinearLayout>
 
     <TextView
