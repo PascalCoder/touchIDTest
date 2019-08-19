@@ -1,5 +1,6 @@
 package com.thepascal.touchidtest
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,8 +25,9 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
                 .setNegativeButtonText(getString(R.string.touchID_negative_btn_text))
                 .build()
 
-            if(mBiometricManager == null){
-
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+                Toast.makeText(this@MainActivity, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
             }
 
             mBiometricManager.authenticate(this@MainActivity)

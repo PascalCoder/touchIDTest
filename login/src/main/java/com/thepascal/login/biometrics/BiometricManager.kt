@@ -15,7 +15,7 @@ import com.thepascal.touchidtest.BiometricManagerV23
 class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23() {
 
     init {
-        this.context = biometricBuilder.context
+        this.context = biometricBuilder.mContext
         this.title = biometricBuilder.title
         this.subtitle = biometricBuilder.subtitle
         this.description = biometricBuilder.description
@@ -45,30 +45,11 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
         if(!BiometricUtils.isFingerprintAvailable(context)){
             biometricCallback.onBiometricAuthenticationNotAvailable()
 
-            //prompt the user to register a fingerprint for versions >= 28
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                Toast.makeText(context, "Please enroll a fingerprint", Toast.LENGTH_LONG).show()
-
-                Handler().postDelayed(
-                    {
-                        //Implicit intent sending user to register a fingerprint for versions >= 28
-                        context.startActivity(Intent(Settings.ACTION_FINGERPRINT_ENROLL))
-                    }, 5000
-                )
-            }else{
-                Toast.makeText(context, "Please enroll a fingerprint ", Toast.LENGTH_LONG).show()
-                Handler().postDelayed(
-                    {
-                        //Implicit intent sending user to register a fingerprint for versions < 28 and >= 23
-                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-                    }, 5000
-                )
-
-            }
-
+            promptUserToRegisterFingerprint()
         }
 
-        displayBiometricDialog(biometricCallback)
+        if (BiometricUtils.isFingerprintAvailable(context))
+            displayBiometricDialog(biometricCallback)
     }
 
     fun cancelAuthentication(){
@@ -103,6 +84,38 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
             )
     }
 
+    private fun promptUserToRegisterFingerprint(){
+        //prompt the user to register a fingerprint for versions >= 28
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Toast.makeText(context, "Please enroll a fingerprint", Toast.LENGTH_LONG).show()
+
+            //Let's give time to Toast to disapear before sending the user to fingerprint
+            // registration page
+            Handler().postDelayed(
+                {
+                    //Implicit intent sending user to register a fingerprint for versions >= 28
+                    context.startActivity(Intent(Settings.ACTION_FINGERPRINT_ENROLL))
+                }, 5000
+            )
+
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            Toast.makeText(context, "Please enroll a fingerprint ", Toast.LENGTH_LONG).show()
+
+            //Let's give time to Toast to disappear before sending the user to fingerprint
+            // registration page
+            Handler().postDelayed(
+                {
+                    //Implicit intent sending user to register a fingerprint for versions < 28 and >= 23
+                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                }, 5000
+            )
+
+        }else{
+            //Toast.makeText(mContext, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
+
+        }
+    }
+
     //var mCancellationSignal = CancellationSignal()
 
     class BiometricBuilder(context: Context){
@@ -112,11 +125,11 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
         lateinit var description: String
         lateinit var negativeButtonText: String
 
-        var context: Context
+        var mContext: Context = context
 
-        init {
-            this.context = context
-        }
+        /*init {
+            this.mContext = context
+        }*/
 
         fun setTitle(title: String): BiometricBuilder {
             this.title = title
@@ -144,45 +157,4 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
 
     }
 
-    /*companion object{
-
-        class BiometricBuilder(context: Context){
-
-            lateinit var title: String
-            lateinit var subtitle: String
-            lateinit var description: String
-            lateinit var negativeButtonText: String
-
-            var context: Context
-
-            init {
-                this.context = context
-            }
-
-            fun setTitle(title: String): BiometricBuilder{
-                this.title = title
-                return this
-            }
-
-            fun setSubtitle(subtitle: String): BiometricBuilder{
-                this.subtitle = subtitle
-                return this
-            }
-
-            fun setDescription(description: String): BiometricBuilder{
-                this.description = description
-                return this
-            }
-
-            fun setNegativeButtonText(negativeButtonText: String): BiometricBuilder{
-                this.negativeButtonText = negativeButtonText
-                return this
-            }
-
-            *//*fun build(): BiometricManager{
-                return BiometricManager(this)
-            }*//*
-
-        }
-    }*/
 }
