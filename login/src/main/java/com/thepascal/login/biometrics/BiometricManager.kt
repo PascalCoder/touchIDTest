@@ -45,32 +45,11 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
         if(!BiometricUtils.isFingerprintAvailable(context)){
             biometricCallback.onBiometricAuthenticationNotAvailable()
 
-            //prompt the user to register a fingerprint for versions >= 28
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                Toast.makeText(context, "Please enroll a fingerprint", Toast.LENGTH_LONG).show()
-
-                Handler().postDelayed(
-                    {
-                        //Implicit intent sending user to register a fingerprint for versions >= 28
-                        context.startActivity(Intent(Settings.ACTION_FINGERPRINT_ENROLL))
-                    }, 5000
-                )
-            }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                Toast.makeText(context, "Please enroll a fingerprint ", Toast.LENGTH_LONG).show()
-                Handler().postDelayed(
-                    {
-                        //Implicit intent sending user to register a fingerprint for versions < 28 and >= 23
-                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-                    }, 5000
-                )
-
-            }else{
-                //Toast.makeText(mContext, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
-            }
-
+            promptUserToRegisterFingerprint()
         }
 
-        displayBiometricDialog(biometricCallback)
+        if (BiometricUtils.isFingerprintAvailable(context))
+            displayBiometricDialog(biometricCallback)
     }
 
     fun cancelAuthentication(){
@@ -103,6 +82,38 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
                 CancellationSignal(), context.mainExecutor,
                 BiometricCallbackV28(biometricCallback)
             )
+    }
+
+    private fun promptUserToRegisterFingerprint(){
+        //prompt the user to register a fingerprint for versions >= 28
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Toast.makeText(context, "Please enroll a fingerprint", Toast.LENGTH_LONG).show()
+
+            //Let's give time to Toast to disapear before sending the user to fingerprint
+            // registration page
+            Handler().postDelayed(
+                {
+                    //Implicit intent sending user to register a fingerprint for versions >= 28
+                    context.startActivity(Intent(Settings.ACTION_FINGERPRINT_ENROLL))
+                }, 5000
+            )
+
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            Toast.makeText(context, "Please enroll a fingerprint ", Toast.LENGTH_LONG).show()
+
+            //Let's give time to Toast to disappear before sending the user to fingerprint
+            // registration page
+            Handler().postDelayed(
+                {
+                    //Implicit intent sending user to register a fingerprint for versions < 28 and >= 23
+                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                }, 5000
+            )
+
+        }else{
+            //Toast.makeText(mContext, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
+
+        }
     }
 
     //var mCancellationSignal = CancellationSignal()
