@@ -15,6 +15,7 @@ import com.thepascal.login.R
 import com.thepascal.login.biometrics.BiometricCallback
 import java.io.IOException
 import java.security.*
+import javax.crypto.NoSuchPaddingException
 import javax.crypto.SecretKey
 import javax.security.cert.CertificateException
 
@@ -104,7 +105,7 @@ open class BiometricManagerV23 {
         keyGenerator.init(
             KeyGenParameterSpec.Builder(
                 KEY_NAME,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT) //| KeyProperties.PURPOSE_DECRIPT
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT) //| KeyProperties.PURPOSE_DECRYPT
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setUserAuthenticationRequired(true)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
@@ -120,6 +121,8 @@ open class BiometricManagerV23 {
                                 + KeyProperties.BLOCK_MODE_CBC + "/"
                                 + KeyProperties.ENCRYPTION_PADDING_PKCS7)
         }catch (ae: NoSuchAlgorithmException){ // NoSuchPaddingException
+            throw RuntimeException("Failed to get Cipher")
+        }catch (nsp: NoSuchPaddingException){
             throw RuntimeException("Failed to get Cipher")
         }
 
