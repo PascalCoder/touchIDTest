@@ -1,22 +1,48 @@
 package com.thepascal.touchidtest
 
+import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.thepascal.login.biometrics.BiometricCallback
 import com.thepascal.login.biometrics.BiometricManager
+import com.thepascal.login.biometrics.BiometricManagerx
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), BiometricCallback {
 
     private lateinit var mBiometricManager: BiometricManager
+    private lateinit var biometricManagerx: BiometricManagerx
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        btnAuthenticate.setOnClickListener { //.BiometricBuilder(this@MainActivity)
+        /* new dependency */
+
+        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.touchID_title))
+            .setSubtitle(getString(R.string.touchID_subtitle))
+            .setDescription(getString(R.string.touchID_description))
+            .setNegativeButtonText(getString(R.string.touchID_negative_btn_text))
+            .build()
+
+        biometricManagerx = BiometricManagerx(this, this)
+
+        btnAuthenticate.setOnClickListener {
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+                Toast.makeText(this@MainActivity, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            biometricManagerx.checkRequirements(this)
+
+            biometricManagerx.biometricPrompt.authenticate(promptInfo)
+        }
+
+        /*btnAuthenticate.setOnClickListener { //.BiometricBuilder(this@MainActivity)
             //Toast.makeText(applicationContext, "What's app!", Toast.LENGTH_SHORT).show()
             mBiometricManager = BiometricManager.BiometricBuilder(this@MainActivity)
                 .setTitle(getString(R.string.touchID_title))
@@ -30,8 +56,15 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
                 return@setOnClickListener
             }
 
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                val biometricPrompt = androidx.biometric.BiometricPrompt(this, Executors.newSingleThreadExecutor(),
+                    object: androidx.biometric.BiometricPrompt.AuthenticationCallback(){
+
+                    })
+            }
+
             mBiometricManager.authenticate(this@MainActivity)
-        }
+        }*/
     }
 
     override fun onSdkVersionNotSupported() {
@@ -55,16 +88,24 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
     }
 
     override fun onAuthenticationFailed() {
-        Toast.makeText(applicationContext, getString(R.string.biometric_failure), Toast.LENGTH_LONG).show()
+        this.runOnUiThread {
+            Toast.makeText(applicationContext, getString(R.string.biometric_failure), Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onAuthenticationCancelled() {
-        Toast.makeText(applicationContext, getString(R.string.biometric_cancelled), Toast.LENGTH_LONG).show()
-        mBiometricManager.cancelAuthentication()
+        this.runOnUiThread{
+            Toast.makeText(applicationContext, getString(R.string.biometric_cancelled), Toast.LENGTH_LONG).show()
+            //mBiometricManager.cancelAuthentication()
+            biometricManagerx.cancelAuthentication()
+        }
     }
 
     override fun onAuthenticationSuccessful() {
-        Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
+        this.runOnUiThread {
+            Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
+        }
+
         //will start a new activity here or should I use an interactor?
     }
 
@@ -73,7 +114,12 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
     }
 
     override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-        Toast.makeText(applicationContext, errString, Toast.LENGTH_LONG).show()
+        this.runOnUiThread {
+            if(errString.toString().equals("CANCEL")){
+                onAuthenticationCancelled()
+            }
+            //Toast.makeText(applicationContext, errString, Toast.LENGTH_LONG).show()
+        }
     }
 
 }
