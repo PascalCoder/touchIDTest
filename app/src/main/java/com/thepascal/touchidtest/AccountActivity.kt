@@ -17,7 +17,7 @@ class AccountActivity : AppCompatActivity() {
     }
 
     fun logOut(){
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
 }
