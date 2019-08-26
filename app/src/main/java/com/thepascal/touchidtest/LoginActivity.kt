@@ -50,7 +50,7 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
 
                 biometricManagerx.checkRequirements(this)
 
-                biometricManagerx.biometricPrompt.authenticate(promptInfo)
+                //biometricManagerx.biometricPrompt.authenticate(promptInfo)
             }
         }
 
@@ -74,6 +74,13 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
                 biometricManagerx.checkRequirements(this)
 
                 biometricManagerx.biometricPrompt.authenticate(promptInfo)
+            }else{
+                if(etEmail.text.toString().equals("pascal.arvee@gmail.com")
+                    && etPasswordL.text.toString().equals("1234")){
+                    onAuthenticationSuccessful()
+                }else{
+                    Toast.makeText(this@LoginActivity, "User not recognized", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
