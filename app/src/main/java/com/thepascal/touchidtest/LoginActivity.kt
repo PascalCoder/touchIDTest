@@ -1,7 +1,9 @@
 package com.thepascal.touchidtest
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -16,10 +18,21 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
 
     private var isPermissionGranted = false
     private lateinit var biometricManagerx: BiometricManagerx
+    var map: HashMap<String, ByteArray>? = null
+    var decryptedPassword: String? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        val editor = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE).edit()
+        editor.putString("email", getString(R.string.user_email))
+        editor.apply()
+
+        val preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        etEmail.setText(preferences.getString("email", ""))
 
         val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.touchID_title))
@@ -73,10 +86,16 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
 
                 biometricManagerx.checkRequirements(this)
 
+                val decryptedBytes = Encryption().keyStoreDecrypt(map!!)
+                decryptedPassword = String(decryptedBytes!!, Charsets.UTF_8)
+
                 biometricManagerx.biometricPrompt.authenticate(promptInfo)
             }else{
                 if(etEmail.text.toString().equals("pascal.arvee@gmail.com")
                     && etPasswordL.text.toString().equals("1234")){
+                    val email = "pascal.arvee@gmail.com"
+                    map = Encryption().keyStoreEncrypt("1234".toByteArray(Charsets.UTF_8))
+
                     onAuthenticationSuccessful()
                 }else{
                     Toast.makeText(this@LoginActivity, "User not recognized", Toast.LENGTH_SHORT).show()
@@ -133,7 +152,10 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
     override fun onAuthenticationSuccessful() {
         this.runOnUiThread {
             Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
-            startActivity(Intent(this@LoginActivity, AccountActivity::class.java))
+            val intent = Intent(this@LoginActivity, AccountActivity::class.java)
+            intent.putExtra("pass", decryptedPassword)
+            //startActivity(Intent(this@LoginActivity, AccountActivity::class.java))
+            startActivity(intent)
         }
 
         //will start a new activity here or should I use an interactor?
