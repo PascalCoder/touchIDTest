@@ -1,5 +1,6 @@
 package com.thepascal.touchidtest
 
+import android.content.Intent
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
 
     private lateinit var mBiometricManager: BiometricManager
     private lateinit var biometricManagerx: BiometricManagerx
+    var isBiometricEnabled:Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,9 +106,11 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
     override fun onAuthenticationSuccessful() {
         this.runOnUiThread {
             Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
+            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
         }
 
         //will start a new activity here or should I use an interactor?
+        //startActivity(Intent(this, AccountActivity::class.java))
     }
 
     override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence) {
