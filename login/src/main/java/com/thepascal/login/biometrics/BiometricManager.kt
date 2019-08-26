@@ -61,11 +61,12 @@ class BiometricManager(biometricBuilder: BiometricBuilder): BiometricManagerV23(
     }
 
     private fun displayBiometricDialog(biometricCallback: BiometricCallback)
+        //= displayBiometricPrompt(biometricCallback)
         = if(BiometricUtils.isBiometricEnabled()) displayBiometricPrompt(biometricCallback)
-            else displayBiometricPromptV23(biometricCallback)
+           else displayBiometricPromptV23(biometricCallback)
 
     @TargetApi(Build.VERSION_CODES.P)
-    fun displayBiometricPrompt(biometricCallback: BiometricCallback){
+    private fun displayBiometricPrompt(biometricCallback: BiometricCallback){
         BiometricPrompt.Builder(context)
             .setTitle(title)
             .setSubtitle(subtitle)

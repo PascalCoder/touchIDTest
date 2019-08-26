@@ -2,7 +2,7 @@
     <string name="app_name">TouchIDTest</string>
     <string name="btn_auth">Login</string>
     <string name="touchID_title">Login</string>
-    <string name="touchID_subtitle">Login to your Osta account</string>
+    <string name="touchID_subtitle">Login to your account</string>
     <string name="touchID_description">Place your finger on the device home button to verify your identity</string>
     <string name="touchID_negative_btn_text">CANCEL</string>
 

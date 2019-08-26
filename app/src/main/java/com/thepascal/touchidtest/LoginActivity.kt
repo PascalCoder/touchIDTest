@@ -1,28 +1,25 @@
 package com.thepascal.touchidtest
 
+import android.Manifest
 import android.content.Intent
-import android.hardware.biometrics.BiometricPrompt
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.thepascal.login.biometrics.BiometricCallback
-import com.thepascal.login.biometrics.BiometricManager
 import com.thepascal.login.biometrics.BiometricManagerx
-import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.Executors
+import kotlinx.android.synthetic.main.activity_login.*
 
-class MainActivity : AppCompatActivity(), BiometricCallback {
+class LoginActivity : AppCompatActivity(), BiometricCallback {
 
-    private lateinit var mBiometricManager: BiometricManager
+    private var isPermissionGranted = false
     private lateinit var biometricManagerx: BiometricManagerx
-    var isBiometricEnabled:Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        /* new dependency */
+        setContentView(R.layout.activity_login)
 
         val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.touchID_title))
@@ -33,40 +30,70 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
 
         biometricManagerx = BiometricManagerx(this, this)
 
-        btnAuthenticate.setOnClickListener {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
-                Toast.makeText(this@MainActivity, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
+        if(isPermissionGranted){
 
-            biometricManagerx.checkRequirements(this)
-
-            biometricManagerx.biometricPrompt.authenticate(promptInfo)
         }
 
-        /*btnAuthenticate.setOnClickListener { //.BiometricBuilder(this@MainActivity)
-            //Toast.makeText(applicationContext, "What's app!", Toast.LENGTH_SHORT).show()
-            mBiometricManager = BiometricManager.BiometricBuilder(this@MainActivity)
-                .setTitle(getString(R.string.touchID_title))
-                .setSubtitle(getString(R.string.touchID_subtitle))
-                .setDescription(getString(R.string.touchID_description))
-                .setNegativeButtonText(getString(R.string.touchID_negative_btn_text))
-                .build()
+        if(cbUseBiometric.isChecked){
+            isPermissionGranted = true
+            Toast.makeText(this, "You've already granted that permission!", Toast.LENGTH_SHORT).show()
+            PermissionHelper.requestBiometricPermission(this)
+        }
 
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
-                Toast.makeText(this@MainActivity, "Your device does not support biometrics", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
+        cbUseBiometric.setOnClickListener {
+            if(cbUseBiometric.isChecked) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    Toast.makeText(this@LoginActivity, "Your device does not support biometrics", Toast.LENGTH_LONG)
+                        .show()
+                    return@setOnClickListener
+                }
+
+                biometricManagerx.checkRequirements(this)
+
+                //biometricManagerx.biometricPrompt.authenticate(promptInfo)
             }
+        }
 
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
-                val biometricPrompt = androidx.biometric.BiometricPrompt(this, Executors.newSingleThreadExecutor(),
-                    object: androidx.biometric.BiometricPrompt.AuthenticationCallback(){
+        btnLogIn.setOnClickListener {
+            /*if(ContextCompat.checkSelfPermission(this@LoginActivity,
+                    Manifest.permission.USE_FINGERPRINT) ==
+                    PackageManager.PERMISSION_GRANTED){
+                isPermissionGranted = true
+                Toast.makeText(this, "You've already granted that permission!", Toast.LENGTH_SHORT).show()
 
-                    })
+            }else{
+                PermissionHelper.requestBiometricPermission(this)
+            }*/
+            if(cbUseBiometric.isChecked) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    Toast.makeText(this@LoginActivity, "Your device does not support biometrics", Toast.LENGTH_LONG)
+                        .show()
+                    return@setOnClickListener
+                }
+
+                biometricManagerx.checkRequirements(this)
+
+                biometricManagerx.biometricPrompt.authenticate(promptInfo)
+            }else{
+                if(etEmail.text.toString().equals("pascal.arvee@gmail.com")
+                    && etPasswordL.text.toString().equals("1234")){
+                    onAuthenticationSuccessful()
+                }else{
+                    Toast.makeText(this@LoginActivity, "User not recognized", Toast.LENGTH_SHORT).show()
+                }
             }
+        }
+    }
 
-            mBiometricManager.authenticate(this@MainActivity)
-        }*/
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == PermissionHelper.BIOMETRIC_PERMISSION_CODE){
+            if(grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this, "Permission DENIED", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onSdkVersionNotSupported() {
@@ -106,7 +133,7 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
     override fun onAuthenticationSuccessful() {
         this.runOnUiThread {
             Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
-            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
+            startActivity(Intent(this@LoginActivity, AccountActivity::class.java))
         }
 
         //will start a new activity here or should I use an interactor?
@@ -125,5 +152,4 @@ class MainActivity : AppCompatActivity(), BiometricCallback {
             //Toast.makeText(applicationContext, errString, Toast.LENGTH_LONG).show()
         }
     }
-
 }
