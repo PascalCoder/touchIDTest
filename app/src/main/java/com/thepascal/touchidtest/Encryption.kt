@@ -1,6 +1,7 @@
 package com.thepascal.touchidtest
 
 import android.annotation.TargetApi
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
@@ -149,7 +150,7 @@ class Encryption {
         return decrypted
     }
 
-    @TargetApi(23)
+    @TargetApi(Build.VERSION_CODES.M)
     fun keystoreTest() {
 
         //TODO - Add Test code here
@@ -172,4 +173,29 @@ class Encryption {
             Log.e("MyApp", "The decrypted string is: $decryptedString")
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    fun encryptTest(password: String) {
+
+        //TODO - Add Test code here
+        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+        val keyGenParameterSpec = KeyGenParameterSpec.Builder("MyKeyAlias",
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            //.setUserAuthenticationRequired(true) // 2 requires lock screen, invalidated if lock screen is disabled
+            //.setUserAuthenticationValidityDurationSeconds(120) // 3 only available x seconds from password authentication. -1 requires finger print - every time
+            .setRandomizedEncryptionRequired(true) // 4 different ciphertext for same plaintext on each call
+            .build()
+        keyGenerator.init(keyGenParameterSpec)
+        keyGenerator.generateKey()
+
+        val map = keystoreEncrypt(password.toByteArray(Charsets.UTF_8))
+        val decryptedBytes = keystoreDecrypt(map)
+        decryptedBytes?.let {
+            val decryptedString = String(it, Charsets.UTF_8)
+            Log.e("MyApp", "The decrypted string is: $decryptedString")
+        }
+    }
+
 }
